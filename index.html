@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sistema de Recibos — Grupo Vanguarda</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --red:#c0392b;--red-dark:#922b21;--red-lite:#fadbd8;
+  --off:#fafafa;--gray:#f2f2f2;--border:#e0e0e0;
+  --text:#1a1a1a;--muted:#888;
+  --green:#1a7a4a;--green-lite:#d5f5e3;
+  --orange:#e67e22;--orange-lite:#fde8cc;
+  --yellow:#f39c12;--yellow-lite:#fff3cd;
+  --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+
+/* HEADER */
+header{background:var(--red);padding:0 20px;box-shadow:0 3px 12px rgba(192,57,43,.35);position:sticky;top:0;z-index:100}
+.header-top{height:54px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;letter-spacing:1.5px;color:#fff;display:flex;align-items:center;gap:10px}
+.logo-icon{background:#fff;color:var(--red);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-tabs{display:flex;gap:3px;background:rgba(0,0,0,.18);border-radius:8px;padding:3px}
+.nav-tab{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:6px 13px;border:none;border-radius:6px;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.75)}
+.nav-tab.active{background:#fff;color:var(--red)}
+.nav-tab:not(.active):hover{background:rgba(255,255,255,.15);color:#fff}
+.base-bar{height:36px;display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.15)}
+.base-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.5px}
+.base-btns{display:flex;gap:4px}
+.base-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;padding:3px 16px;border:2px solid rgba(255,255,255,.4);border-radius:20px;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.75)}
+.base-btn.active{background:#fff;color:var(--red);border-color:#fff}
+.base-btn:not(.active):hover{background:rgba(255,255,255,.15);color:#fff}
+.base-cnpj{font-size:11px;color:rgba(255,255,255,.65);margin-left:4px}
+
+/* LAYOUT */
+.main{max-width:960px;margin:22px auto;padding:0 16px}
+.page{display:none}
+.page.active{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px}
+.card-head{background:var(--red);padding:13px 20px;display:flex;align-items:center;justify-content:space-between}
+.card-head h2{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#fff;letter-spacing:.5px}
+.num-badge{background:#fff;color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;padding:3px 12px;border-radius:20px}
+.card-body{padding:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.fg{display:flex;flex-direction:column;gap:5px;position:relative}
+label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--red-dark)}
+input,select,textarea{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius);font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);background:var(--off);outline:none;transition:border .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--red);background:#fff}
+input::placeholder{color:#bbb}
+
+/* TOGGLE */
+.toggle-recibo{display:flex;align-items:center;gap:0;border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--off);height:42px}
+.toggle-recibo input[type="radio"]{display:none}
+.toggle-recibo label{flex:1;text-align:center;padding:0 10px;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;color:var(--muted);text-transform:uppercase;border:none;background:transparent;margin:0}
+.toggle-recibo input[type="radio"]:checked + label{background:var(--red);color:#fff}
+.toggle-recibo label:first-of-type{border-right:1px solid var(--border)}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative}
+.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--red);border-top:none;border-radius:0 0 var(--radius) var(--radius);max-height:200px;overflow-y:auto;z-index:200;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.ac-dropdown.open{display:block}
+.ac-item{padding:9px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.selected{background:var(--red-lite);color:var(--red-dark)}
+.ac-novo{padding:9px 12px;cursor:pointer;font-size:13px;color:var(--green);font-weight:600;border-top:2px solid var(--border);display:flex;align-items:center;gap:6px}
+.ac-novo:hover{background:var(--green-lite)}
+
+/* CALC */
+.calc-box{grid-column:1/-1;background:var(--red-lite);border:2px dashed var(--red);border-radius:var(--radius);padding:13px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end}
+.result-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--green);padding:8px 12px;background:#fff;border:2px solid var(--green);border-radius:var(--radius);min-height:42px;display:flex;align-items:center}
+.total-box{grid-column:1/-1;background:#f0faf5;border:2px solid var(--green);border-radius:var(--radius);padding:11px 16px;display:flex;justify-content:space-between;align-items:center}
+.tg-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--green)}
+.tg-val{font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:900;color:var(--green)}
+
+/* BUTTONS */
+.divider{height:1px;background:linear-gradient(to right,transparent,var(--border),transparent);margin:16px 0}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.4px;padding:9px 20px;border:none;border-radius:var(--radius);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--red);color:#fff;box-shadow:0 3px 10px rgba(192,57,43,.3)}
+.btn-primary:hover{background:var(--red-dark);transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#145e38;transform:translateY(-1px)}
+.btn-blue{background:#2980b9;color:#fff}
+.btn-blue:hover{background:#1f6391;transform:translateY(-1px)}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:#c87415;transform:translateY(-1px)}
+.btn-ghost{background:var(--gray);color:var(--text)}
+.btn-ghost:hover{background:var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+/* TOAST */
+#toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:var(--radius);font-weight:600;font-size:14px;color:#fff;z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{background:var(--green)}
+#toast.err{background:var(--red)}
+#toast.warn{background:var(--orange)}
+
+/* RECIBO PRINT */
+.recibo-wrap{margin-top:16px}
+.wrap-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.wrap-header h3{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--red)}
+#print-area{background:#fff;border:1px solid #ccc;border-radius:8px;padding:20px 24px;font-family:'Barlow',sans-serif;font-size:14px}
+#print-area .via-2{display:none}
+
+@media print{
+  @page{margin:0;size:A4 portrait}
+  html,body{width:210mm;height:297mm;overflow:hidden}
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{position:fixed;top:0;left:0;width:210mm;height:297mm;padding:5mm 8mm;border:none!important;border-radius:0!important;max-width:none!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;box-sizing:border-box;overflow:hidden}
+  #print-area .via-1,#print-area .via-2{display:block!important;flex:1!important;overflow:hidden}
+  #print-area .via-separator{display:block!important;border:none!important;border-top:1.5px dashed #999!important;margin:3mm 0!important;text-align:center;font-size:8px;color:#999;flex-shrink:0}
+  .rec-nome{font-size:13px!important}
+  .rec-info{font-size:9px!important;line-height:1.4!important}
+  .rec-logo{width:30px!important;height:30px!important;font-size:14px!important}
+  .rec-topo{padding-bottom:4px!important;margin-bottom:3px!important;border-bottom-width:2px!important}
+  .rec-titulo{font-size:16px!important;padding:2px 0!important;margin:3px 0!important;letter-spacing:3px!important}
+  .rec-linha{padding:2px 0!important;font-size:10px!important;line-height:1.4!important;gap:2px 5px!important}
+  .lbl{font-size:10px!important}
+  .val{font-size:10px!important;min-width:40px!important}
+  .rec-total-print{padding:4px 10px!important;margin-top:4px!important;border-radius:4px!important}
+  .rec-total-print .tpv{font-size:15px!important}
+  .rec-total-print .tpl{font-size:9px!important}
+  .rec-rodape{margin-top:4px!important;padding-top:4px!important;font-size:9px!important}
+}
+
+/* RECIBO VISUAL */
+.rec-topo{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:8px;border-bottom:3px solid var(--red);margin-bottom:6px}
+.rec-nome{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;line-height:1.2}
+.rec-info{font-size:11px;color:#555;line-height:1.7;margin-top:2px}
+.rec-logo{width:44px;height:44px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0}
+.rec-titulo{background:var(--red);color:#fff;text-align:center;padding:4px 0;margin:5px 0;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;letter-spacing:5px}
+.rec-linha{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;padding:4px 0;border-bottom:1px solid #eee;line-height:1.5}
+.rec-linha:last-child{border-bottom:none}
+.lbl{color:#555;white-space:nowrap;font-size:12px}
+.val{font-weight:700;color:var(--red);border-bottom:1px solid #bbb;padding-bottom:1px;min-width:50px}
+.val.dark{color:var(--text)}.val.green{color:var(--green);font-size:13px}
+.rec-total-print{margin-top:8px;background:var(--green);border-radius:5px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
+.rec-total-print .tpl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:#fff}
+.rec-total-print .tpv{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:#fff}
+.rec-rodape{margin-top:8px;padding-top:7px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#888}
+
+/* FILTROS */
+.lista-filters{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.lista-filters input[type="text"]{flex:1;min-width:150px}
+.date-range{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.date-range span{font-size:12px;color:var(--muted)}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap}
+.ftab{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:5px 11px;border:2px solid var(--border);border-radius:20px;background:#fff;cursor:pointer;transition:all .2s;color:var(--muted)}
+.ftab.fa{border-color:var(--red);color:var(--red);background:var(--red-lite)}
+.ftab.fg{border-color:var(--green);color:var(--green);background:var(--green-lite)}
+.ftab.fo{border-color:var(--orange);color:var(--orange);background:var(--orange-lite)}
+.ftab.fn{border-color:var(--text);color:var(--text);background:var(--gray)}
+
+/* ITEMS LISTA */
+.recibo-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 15px;margin-bottom:8px}
+.recibo-item.prestado{background:var(--green-lite);border-color:#a9dfbf}
+.recibo-item.foto{background:var(--orange-lite);border-color:#f0c07a}
+.ri-top{display:grid;grid-template-columns:80px 1fr 110px 140px;align-items:center;gap:10px}
+.ri-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--red)}
+.recibo-item.prestado .ri-num{color:var(--green)}
+.recibo-item.foto .ri-num{color:var(--orange)}
+.ri-sub{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.ri-main{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ri-valor{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--green)}
+.ri-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;padding-top:7px;border-top:1px solid #eee;align-items:center}
+.sbadge{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.sbadge.aberto{background:var(--red-lite);color:var(--red)}
+.sbadge.prestado{background:var(--green-lite);color:var(--green)}
+.sbadge.foto{background:var(--orange-lite);color:var(--orange)}
+.sbadge.aguard{background:var(--yellow-lite);color:var(--yellow)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty .ei{font-size:38px;margin-bottom:8px}
+
+/* ANEXOS */
+.anexo-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px}
+.anexo-item.com-foto{background:var(--orange-lite);border-color:#f0c07a}
+.anexo-item.prestado{background:var(--green-lite);border-color:#a9dfbf}
+.ri-main{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upload-area{margin-top:10px;padding-top:10px;border-top:1px solid #eee}
+.upload-zone{border:2px dashed var(--border);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;background:var(--off)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--red);background:var(--red-lite)}
+.upload-zone.has-file{border-color:var(--green);background:var(--green-lite)}
+.upload-zone p{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* GALERIA COMPROVANTES */
+.galeria{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.galeria-thumb{position:relative;width:90px;height:70px;border-radius:6px;overflow:hidden;cursor:pointer;border:2px solid var(--border);transition:border .2s}
+.galeria-thumb:hover{border-color:var(--red)}
+.galeria-thumb img{width:100%;height:100%;object-fit:cover}
+.galeria-thumb .del-btn{position:absolute;top:2px;right:2px;background:rgba(192,57,43,.85);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.galeria-thumb:hover .del-btn{display:flex}
+.foto-count{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--orange-lite);color:var(--orange)}
+
+/* ADM */
+.adm-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:18px}
+.pgmt-item{background:var(--off);border:1px solid var(--border);border-radius:8px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.pgmt-desc{font-weight:600;font-size:13px}
+.pgmt-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--green)}
+
+/* MODAIS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:500;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:100%;max-width:420px;box-shadow:0 12px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--red);margin-bottom:14px}
+
+/* MODAL COMPROVANTE */
+.comp-galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+.comp-card{border-radius:8px;overflow:hidden;border:2px solid var(--border);cursor:pointer;transition:border .2s}
+.comp-card:hover{border-color:var(--red)}
+.comp-card img{width:100%;height:140px;object-fit:cover;display:block}
+.comp-card-info{padding:6px 8px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.comp-fullscreen{text-align:center;margin-top:10px}
+.comp-fullscreen img{max-width:100%;max-height:70vh;border-radius:8px;object-fit:contain}
+
+/* CONFIG SETUP */
+.setup-box{background:#fff3cd;border:2px solid var(--yellow);border-radius:10px;padding:16px 20px;margin-bottom:16px}
+.setup-box h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--orange);margin-bottom:8px}
+.setup-box p{font-size:13px;color:#555;margin-bottom:10px}
+
+/* SPINNER */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .5s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media(max-width:640px){
+  .form-grid,.calc-box,.adm-grid{grid-template-columns:1fr}
+  .ri-top{grid-template-columns:1fr 1fr}
+  .nav-tab{padding:5px 9px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo"><div class="logo-icon">📋</div>GRUPO VANGUARDA</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="goTab('novo',this)">＋ Novo</button>
+      <button class="nav-tab" onclick="goTab('lista',this);carregarRecibos()">📂 Histórico</button>
+      <button class="nav-tab" onclick="goTab('anexos',this);carregarAnexos()">📎 Anexar Fotos</button>
+      <button class="nav-tab" onclick="goTab('adm',this);carregarAdm()">⚙️ Config</button>
+    </div>
+  </div>
+  <div class="base-bar">
+    <span class="base-label">BASE:</span>
+    <div class="base-btns">
+      <button class="base-btn active" id="btn-base-102" onclick="selecionarBase('102')">102</button>
+      <button class="base-btn"        id="btn-base-103" onclick="selecionarBase('103')">103</button>
+    </div>
+    <span class="base-cnpj" id="base-cnpj-label">CNPJ: 31.838.128/0002-33</span>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- NOVO -->
+<div id="page-novo" class="page active">
+  <div id="setup-alert" class="setup-box" style="display:none">
+    <h3>⚙️ Configure o Supabase primeiro</h3>
+    <p>Edite o arquivo <strong>js/supabase.js</strong> e insira sua URL e chave anon do projeto Supabase.</p>
+    <button class="btn btn-orange" onclick="goTab('adm',document.querySelectorAll('.nav-tab')[3]);carregarAdm()">Ir para Configurações</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <h2>NOVO RECIBO DE DESCARGA</h2>
+      <span class="num-badge" id="badge-num">Nº —</span>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="fg"><label>🚛 Transportadora</label><input id="f-transp" placeholder="Nome da transportadora"/></div>
+        <div class="fg"><label>🏭 Fornecedor</label>
+          <div class="ac-wrap">
+            <input id="f-forn" placeholder="Digite para buscar..." autocomplete="off"
+              oninput="acFiltrar('f-forn','ac-forn',fornecedores,'forn')"
+              onfocus="acAbrir('f-forn','ac-forn',fornecedores,'forn')"
+              onkeydown="acNavegar(event,'ac-forn')"/>
+            <div class="ac-dropdown" id="ac-forn"></div>
+          </div>
+        </div>
+        <div class="fg"><label>👤 Motorista</label>
+          <div class="ac-wrap">
+            <input id="f-motor" placeholder="Nome do motorista" autocomplete="off"
+              oninput="acFiltrar('f-motor','ac-motor',motoristas,'motor')"
+              onfocus="acAbrir('f-motor','ac-motor',motoristas,'motor')"
+              onkeydown="acNavegar(event,'ac-motor')"/>
+            <div class="ac-dropdown" id="ac-motor"></div>
+          </div>
+        </div>
+        <div class="fg"><label>🚗 Placa</label>
+          <div class="ac-wrap">
+            <input id="f-placa" placeholder="ABC-1234" autocomplete="off" style="text-transform:uppercase"
+              oninput="acFiltrar('f-placa','ac-placa',placas,'placa')"
+              onfocus="acAbrir('f-placa','ac-placa',placas,'placa')"
+              onkeydown="acNavegar(event,'ac-placa')"/>
+            <div class="ac-dropdown" id="ac-placa"></div>
+          </div>
+        </div>
+        <div class="fg"><label>📄 Nº NF</label><input id="f-nf" placeholder="Número da nota fiscal"/></div>
+        <div class="fg"><label>🔢 Nº Carga</label><input id="f-ncarga" placeholder="Número da carga"/></div>
+        <div class="fg"><label>📦 Produto (Frete)</label>
+          <div class="ac-wrap">
+            <input id="f-produto" placeholder="Descrição do produto" autocomplete="off"
+              oninput="acFiltrar('f-produto','ac-produto',produtos,'produto')"
+              onfocus="acAbrir('f-produto','ac-produto',produtos,'produto')"
+              onkeydown="acNavegar(event,'ac-produto')"/>
+            <div class="ac-dropdown" id="ac-produto"></div>
+          </div>
+        </div>
+        <div class="fg"><label>💰 Vlr Recibo Descarga</label><input id="f-descarga" placeholder="R$ 0,00" oninput="fmtMoney(this);recalc()"/></div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>📋 Tipo de Recibo</label>
+          <div class="toggle-recibo">
+            <input type="radio" name="tipoRecibo" id="rb-auto" value="AUTOMATICO" checked/>
+            <label for="rb-auto">🖥️ Automático</label>
+            <input type="radio" name="tipoRecibo" id="rb-manual" value="MANUAL"/>
+            <label for="rb-manual">✍️ Manual</label>
+          </div>
+        </div>
+        <div class="calc-box">
+          <div class="fg"><label>💳 Ref. Pagamento</label><select id="f-ref" onchange="recalc()"><option value="">— Selecione —</option></select></div>
+          <div class="fg"><label>⚖️ QTD / Peso</label><input id="f-qtd" type="number" min="0" step="any" placeholder="Ex: 3" oninput="recalc()"/></div>
+          <div class="fg"><label>= Total do Produto</label><div class="result-val" id="calc-total">R$ 0,00</div></div>
+        </div>
+        <div class="total-box">
+          <div class="tg-label">💵 VALOR TOTAL DO RECIBO<br/><small style="font-weight:400;color:#555;font-size:11px">Descarga + Total Produto</small></div>
+          <div class="tg-val" id="total-geral">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="limpar()">🗑 Limpar</button>
+        <button class="btn btn-primary" id="btn-salvar" onclick="salvar()">💾 Salvar Recibo</button>
+      </div>
+    </div>
+  </div>
+  <div id="recibo-wrap" class="recibo-wrap" style="display:none">
+    <div class="wrap-header">
+      <h3>📄 RECIBO GERADO — 2 VIAS</h3>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Imprimir 2 Vias</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('recibo-wrap').style.display='none'">✕</button>
+      </div>
+    </div>
+    <div id="print-area"></div>
+  </div>
+</div>
+
+<!-- HISTÓRICO -->
+<div id="page-lista" class="page">
+  <div class="card">
+    <div class="card-head"><h2>HISTÓRICO DE RECIBOS</h2></div>
+    <div class="card-body">
+      <div class="lista-filters">
+        <input type="text" id="busca-lista" placeholder="🔍 Buscar..." oninput="aplicarFiltros()"/>
+        <div class="date-range">
+          <span>De:</span><input type="date" id="data-de-lista" onchange="aplicarFiltros()"/>
+          <span>Até:</span><input type="date" id="data-ate-lista" onchange="aplicarFiltros()"/>
+          <button class="btn btn-ghost btn-sm" onclick="limparDatas('lista')">✕</button>
+        </div>
+      </div>
+      <div class="lista-filters" style="margin-top:-4px">
+        <div class="ftabs">
+          <button class="ftab fn active" onclick="setStatusFiltro('todos',this)">Todos</button>
+          <button class="ftab" onclick="setStatusFiltro('EM ABERTO',this)">🔴 Em Aberto</button>
+          <button class="ftab" onclick="setStatusFiltro('FOTO ANEXADA',this)">🟠 Foto Anexada</button>
+          <button class="ftab" onclick="setStatusFiltro('PRESTADO',this)">🟢 Prestado</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="carregarRecibos()">↻</button>
+      </div>
+      <div id="lista-box"><div class="empty"><div class="ei">📋</div><p>Clique em ↻ para carregar</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANEXAR FOTOS -->
+<div id="page-anexos" class="page">
+  <div class="card">
+    <div class="card-head"><h2>📎 RECIBOS — ANEXAR COMPROVANTES</h2></div>
+    <div class="card-body">
+      <div class="lista-filters">
+        <input type="text" id="busca-anexos" placeholder="🔍 Buscar recibo..." oninput="filtrarAnexos()"/>
+        <div class="date-range">
+          <span>De:</span><input type="date" id="data-de-anexos" onchange="filtrarAnexos()"/>
+          <span>Até:</span><input type="date" id="data-ate-anexos" onchange="filtrarAnexos()"/>
+          <button class="btn btn-ghost btn-sm" onclick="limparDatas('anexos')">✕</button>
+        </div>
+      </div>
+      <div class="lista-filters" style="margin-top:-4px">
+        <div class="ftabs">
+          <button class="ftab fn active" onclick="setFiltroAnexo('todos',this)">Todos</button>
+          <button class="ftab" onclick="setFiltroAnexo('AGUARDANDO FOTO',this)">⏳ Aguardando</button>
+          <button class="ftab" onclick="setFiltroAnexo('FOTO ANEXADA',this)">🟠 Foto Anexada</button>
+          <button class="ftab" onclick="setFiltroAnexo('PRESTADO',this)">🟢 Prestado</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="carregarAnexos()">↻</button>
+      </div>
+      <div id="anexos-box"><div class="empty"><div class="ei">📋</div><p>Clique em ↻ para carregar</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div id="page-adm" class="page">
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head"><h2>🔑 CONEXÃO SUPABASE</h2></div>
+    <div class="card-body">
+      <p style="font-size:13px;color:#555;margin-bottom:12px">Configure sua URL e chave do Supabase. As credenciais ficam salvas no navegador (localStorage).</p>
+      <div class="form-grid">
+        <div class="fg" style="grid-column:1/-1"><label>URL do Projeto</label><input id="sb-url" placeholder="https://xxxx.supabase.co"/></div>
+        <div class="fg" style="grid-column:1/-1"><label>Chave Anon (anon key)</label><input id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."/></div>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="salvarConfig()">💾 Salvar e Conectar</button>
+        <button class="btn btn-ghost" onclick="testarConexao()">🔗 Testar Conexão</button>
+      </div>
+      <div id="conn-status" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    </div>
+  </div>
+  <div class="adm-grid">
+    <div class="card">
+      <div class="card-head"><h2>NOVO TIPO</h2></div>
+      <div class="card-body">
+        <div class="fg" style="margin-bottom:12px"><label>Descrição</label><input id="adm-desc" placeholder="Ex: FILME, CAIXA..."/></div>
+        <div class="fg" style="margin-bottom:15px"><label>Valor Unitário (R$)</label><input id="adm-val" placeholder="R$ 0,00" oninput="fmtMoney(this)"/></div>
+        <button class="btn btn-primary" id="btn-adm-add" onclick="addPgmt()" style="width:100%">＋ Adicionar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>TIPOS CADASTRADOS</h2></div>
+      <div class="card-body" id="adm-lista"><div class="empty"><div class="ei">📋</div><p>Nenhum tipo</p></div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div id="toast"></div>
+
+<!-- MODAL COMPROVANTES -->
+<div class="modal-overlay" id="modal-comp" onclick="fecharModal('modal-comp',event)">
+  <div class="modal" style="max-width:720px;width:96%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0" id="comp-titulo">📎 Comprovantes</h3>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-comp').classList.remove('open')">✕ Fechar</button>
+    </div>
+    <div id="comp-body">
+      <div class="empty"><div class="ei">⏳</div><p>Carregando...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR RECIBO -->
+<div class="modal-overlay" id="modal-editar" onclick="fecharModal('modal-editar',event)">
+  <div class="modal" style="max-width:560px;width:96%">
+    <h3>✏️ EDITAR RECIBO</h3>
+    <input type="hidden" id="edit-recibo-id"/>
+    <div class="form-grid" style="gap:10px">
+      <div class="fg"><label>Transportadora</label><input id="edit-transp"/></div>
+      <div class="fg"><label>Fornecedor</label><input id="edit-forn"/></div>
+      <div class="fg"><label>Motorista</label><input id="edit-motor"/></div>
+      <div class="fg"><label>Placa</label><input id="edit-placa" style="text-transform:uppercase"/></div>
+      <div class="fg"><label>Nº NF</label><input id="edit-nf"/></div>
+      <div class="fg"><label>Nº Carga</label><input id="edit-ncarga"/></div>
+      <div class="fg"><label>Produto</label><input id="edit-produto"/></div>
+      <div class="fg"><label>Vlr Descarga</label><input id="edit-descarga" oninput="fmtMoney(this)"/></div>
+      <div class="fg"><label>Status</label>
+        <select id="edit-status">
+          <option value="EM ABERTO">🔴 Em Aberto</option>
+          <option value="FOTO ANEXADA">🟠 Foto Anexada</option>
+          <option value="PRESTADO">🟢 Prestado</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-editar').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-edit" onclick="confirmarEdicaoRecibo()">💾 Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO FORNECEDOR -->
+<div class="modal-overlay" id="modal-forn" onclick="fecharModal('modal-forn',event)">
+  <div class="modal">
+    <h3>🏭 NOVO FORNECEDOR</h3>
+    <div class="fg" style="margin-bottom:14px">
+      <label>Nome do Fornecedor</label>
+      <input id="novo-forn-input" placeholder="Ex: AMBEV, BRF, JBS..."/>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-forn').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-forn" onclick="salvarNovoFornecedor()">✅ Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR TIPO PAGAMENTO -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <h3>✏️ EDITAR TIPO</h3>
+    <input type="hidden" id="edit-tipo-id"/>
+    <div class="fg" style="margin-bottom:12px"><label>Descrição</label><input id="edit-tipo-desc"/></div>
+    <div class="fg"><label>Valor Unitário</label><input id="edit-tipo-val" oninput="fmtMoney(this)"/></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarEdicaoTipo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/supabase-client.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
