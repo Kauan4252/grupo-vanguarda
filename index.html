@@ -243,7 +243,7 @@ input::placeholder{color:#bbb}
       <button class="nav-tab active" onclick="goTab('novo',this)">＋ Novo</button>
       <button class="nav-tab" onclick="goTab('lista',this);carregarRecibos()">📂 Histórico</button>
       <button class="nav-tab" onclick="goTab('anexos',this);carregarAnexos()">📎 Anexar Fotos</button>
-      <button class="nav-tab" onclick="goTab('adm',this);carregarAdm()">⚙️ Config</button>
+      <button class="nav-tab" onclick="goTab('adm',this);carregarAdm()" style="display:none">⚙️ Config</button>
     </div>
   </div>
   <div class="base-bar">
@@ -260,11 +260,7 @@ input::placeholder{color:#bbb}
 
 <!-- NOVO -->
 <div id="page-novo" class="page active">
-  <div id="setup-alert" class="setup-box" style="display:none">
-    <h3>⚙️ Configure o Supabase primeiro</h3>
-    <p>Edite o arquivo <strong>js/supabase.js</strong> e insira sua URL e chave anon do projeto Supabase.</p>
-    <button class="btn btn-orange" onclick="goTab('adm',document.querySelectorAll('.nav-tab')[3]);carregarAdm()">Ir para Configurações</button>
-  </div>
+  <div id="setup-alert" style="display:none"></div>
   <div class="card">
     <div class="card-head">
       <h2>NOVO RECIBO DE DESCARGA</h2>
