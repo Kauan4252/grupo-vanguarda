@@ -238,7 +238,7 @@ input::placeholder{color:#bbb}
 
 <header>
   <div class="header-top">
-    <div class="logo"><div class="logo-icon">📋</div>GRUPO VANGUARDA</div>
+    <div class="logo" id="logo-secret" onclick="logoClick()" style="cursor:pointer;user-select:none"><div class="logo-icon">📋</div>GRUPO VANGUARDA</div>
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="goTab('novo',this)">＋ Novo</button>
       <button class="nav-tab" onclick="goTab('lista',this);carregarRecibos()">📂 Histórico</button>
@@ -508,7 +508,64 @@ input::placeholder{color:#bbb}
   </div>
 </div>
 
-<script src="js/supabase-client.js"></script>
-<script src="js/app.js"></script>
-</body>
-</html>
+<!-- MODAL ADMIN SECRETO -->
+<div class="modal-overlay" id="modal-admin" onclick="fecharModal('modal-admin',event)">
+  <div class="modal" style="max-width:560px;width:96%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0">⚙️ ADMINISTRAÇÃO</h3>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-admin').classList.remove('open')">✕</button>
+    </div>
+    <div id="admin-senha-box">
+      <div class="fg" style="margin-bottom:12px">
+        <label>🔑 Senha de Administrador</label>
+        <input type="password" id="admin-senha-input" placeholder="Digite a senha..." onkeydown="if(event.key==='Enter')verificarSenhaAdmin()"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="verificarSenhaAdmin()">🔓 Entrar</button>
+      <div id="admin-senha-erro" style="color:var(--red);font-size:12px;margin-top:8px;display:none">❌ Senha incorreta!</div>
+    </div>
+    <div id="admin-painel" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--red);margin-bottom:10px">NOVO TIPO DE PAGAMENTO</h4>
+          <div class="fg" style="margin-bottom:10px"><label>Descrição</label><input id="adm-desc" placeholder="Ex: FILME, CAIXA..."/></div>
+          <div class="fg" style="margin-bottom:12px"><label>Valor Unitário (R$)</label><input id="adm-val" placeholder="R$ 0,00" oninput="fmtMoney(this)"/></div>
+          <button class="btn btn-primary" id="btn-adm-add" onclick="addPgmt()" style="width:100%">＋ Adicionar</button>
+        </div>
+        <div>
+          <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:var(--red);margin-bottom:10px">TIPOS CADASTRADOS</h4>
+          <div id="adm-lista"><div class="empty"><div class="ei">📋</div><p>Nenhum tipo</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Acesso secreto: 5 cliques no logo ────────────────────
+let _logoClicks = 0, _logoTimer = null;
+function logoClick() {
+  _logoClicks++;
+  clearTimeout(_logoTimer);
+  _logoTimer = setTimeout(() => _logoClicks = 0, 2000);
+  if (_logoClicks >= 5) {
+    _logoClicks = 0;
+    document.getElementById('admin-senha-input').value = '';
+    document.getElementById('admin-senha-erro').style.display = 'none';
+    document.getElementById('admin-senha-box').style.display = 'block';
+    document.getElementById('admin-painel').style.display = 'none';
+    document.getElementById('modal-admin').classList.add('open');
+    setTimeout(() => document.getElementById('admin-senha-input').focus(), 100);
+  }
+}
+function verificarSenhaAdmin() {
+  const senha = document.getElementById('admin-senha-input').value;
+  if (senha === 'vanguarda2025') {
+    document.getElementById('admin-senha-box').style.display = 'none';
+    document.getElementById('admin-painel').style.display = 'block';
+    carregarAdm();
+  } else {
+    document.getElementById('admin-senha-erro').style.display = 'block';
+    document.getElementById('admin-senha-input').value = '';
+  }
+}
+</script>
