@@ -2,8 +2,8 @@
 // Wrapper leve para o Supabase REST API (sem dependência de npm)
 
 const SupabaseClient = (() => {
-  let _url = '';
-  let _key = '';
+  let _url = 'https://dtnwwufpbfboszyvykyc.supabase.co';
+  let _key = 'sb_publishable_TNYh4NBole7hTCTECSLTNg_fQ327qjY';
 
   function init(url, key) {
     _url = url.replace(/\/$/, '');
