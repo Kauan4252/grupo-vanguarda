@@ -18,17 +18,8 @@ const CNPJS = {
 
 // ── Init ──────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Carrega config salva
-  const url = localStorage.getItem('sb_url') || '';
-  const key = localStorage.getItem('sb_key') || '';
-  if (url && key) {
-    SupabaseClient.init(url, key);
-    document.getElementById('sb-url').value = url;
-    document.getElementById('sb-key').value = key;
-    iniciarApp();
-  } else {
-    document.getElementById('setup-alert').style.display = 'block';
-  }
+  // Credenciais fixas no supabase-client.js — inicia direto
+  iniciarApp();
 
   document.addEventListener('click', e => {
     if (!e.target.closest('.ac-wrap')) {
